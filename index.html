@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>✦ Gem Gallery</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+:root {
+  --ink:#0d0a1a;--deep:#130d2e;--iris:#4c2fa0;--lilac:#8b6fcb;
+  --pearl:#d4c8f0;--glow:#b89fff;--gold:#e8c97a;--aqua:#60c8d8;--white:#f5f0ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--ink);color:var(--pearl);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;overflow-x:hidden;}
+#bg{position:fixed;inset:0;pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 12px 100px;}
+header{text-align:center;padding:40px 0 24px;}
+header h1{font-family:'Cinzel',serif;font-size:clamp(1.5rem,5vw,2.6rem);font-weight:900;letter-spacing:.08em;background:linear-gradient(135deg,var(--gold),var(--glow),var(--aqua));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+header p{margin-top:6px;font-size:.88rem;font-style:italic;color:var(--lilac);}
+#gem-count{display:inline-block;margin-top:11px;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.14em;color:var(--gold);border:1px solid rgba(232,201,122,.3);border-radius:20px;padding:3px 13px;}
+#toolbar{display:flex;gap:8px;justify-content:center;margin:16px 0 18px;}
+.tb-btn{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.1em;padding:9px 20px;border-radius:20px;border:1px solid rgba(139,111,203,.5);background:rgba(45,27,105,.4);color:var(--pearl);cursor:pointer;user-select:none;}
+.tb-btn.primary{background:linear-gradient(135deg,var(--iris),#7040d0);border-color:var(--glow);color:var(--white);}
+#search-wrap{margin:0 0 16px;position:relative;}
+#search{width:100%;background:rgba(19,13,46,.8);border:1px solid rgba(139,111,203,.4);border-radius:10px;padding:10px 14px 10px 36px;color:var(--pearl);font-family:'Crimson Pro',serif;font-size:1rem;outline:none;}
+#search::placeholder{color:rgba(212,200,240,.3);}
+#search-wrap::before{content:'✦';position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--lilac);font-size:.75rem;}
+.group-hd{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.18em;color:var(--gold);padding:18px 4px 8px;border-bottom:1px solid rgba(232,201,122,.2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.group-hd::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(232,201,122,.2),transparent);}
+.gem-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+.gem-tile{background:linear-gradient(145deg,rgba(30,18,69,.9),rgba(19,13,46,.95));border:1px solid rgba(139,111,203,.3);border-radius:14px;overflow:hidden;}
+.tile-img{position:relative;width:100%;aspect-ratio:1;overflow:hidden;background:var(--deep);cursor:pointer;}
+.tile-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
+.tile-img img.rot{transform:rotate(90deg) scale(1.35);}
+.no-photo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;background:radial-gradient(circle at 50% 60%,rgba(76,47,160,.4),transparent 70%);}
+.rot-btn{position:absolute;bottom:6px;right:6px;width:30px;height:30px;border-radius:50%;border:1px solid rgba(139,111,203,.5);background:rgba(13,10,26,.75);color:var(--lilac);font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;user-select:none;}
+.rot-btn.on{background:var(--iris);border-color:var(--glow);color:var(--white);}
+.tile-info{padding:8px 10px 9px;}
+.tile-name{font-family:'Cinzel',serif;font-size:.68rem;font-weight:600;color:var(--white);letter-spacing:.05em;line-height:1.3;margin-bottom:2px;}
+.tile-sub{font-size:.73rem;font-style:italic;color:var(--lilac);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tile-id{font-family:'Cinzel',serif;font-size:.57rem;color:rgba(139,111,203,.4);margin-top:2px;}
+.tile-acts{display:flex;gap:5px;margin-top:6px;}
+.tile-act{flex:1;font-family:'Cinzel',serif;font-size:.57rem;letter-spacing:.06em;padding:6px 3px;border-radius:6px;border:1px solid rgba(139,111,203,.3);background:rgba(45,27,105,.35);color:var(--lilac);cursor:pointer;text-align:center;user-select:none;}
+.tile-act.del{border-color:rgba(220,80,100,.3);background:rgba(120,20,40,.3);color:#e08898;}
+#lightbox{display:none;position:fixed;inset:0;z-index:100;background:rgba(8,5,18,.92);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:18px;}
+#lightbox.open{display:flex;}
+#lb-inner{max-width:450px;width:100%;background:linear-gradient(145deg,var(--deep),var(--ink));border:1px solid rgba(139,111,203,.4);border-radius:20px;overflow:hidden;position:relative;}
+#lb-img-wrap{width:100%;aspect-ratio:1;overflow:hidden;background:var(--ink);}
+#lb-img{width:100%;height:100%;object-fit:contain;display:block;}
+#lb-img.rot{transform:rotate(90deg) scale(1.35);}
+#lb-nophoto{width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:5rem;}
+#lb-close{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(139,111,203,.5);background:rgba(13,10,26,.8);color:var(--pearl);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;user-select:none;}
+#lb-body{padding:14px 18px 18px;}
+#lb-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:600;color:var(--white);letter-spacing:.06em;margin-bottom:3px;}
+#lb-group{font-size:.82rem;font-style:italic;color:var(--gold);margin-bottom:8px;}
+#lb-detail{font-size:.85rem;line-height:1.65;color:var(--pearl);}
+#lb-detail span{color:var(--lilac);font-style:italic;}
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(8,5,18,.93);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;overflow-y:auto;padding:18px 13px 40px;}
+.modal.open{display:flex;}
+.mbox{width:100%;max-width:450px;margin:auto;background:linear-gradient(145deg,var(--deep),var(--ink));border:1px solid rgba(139,111,203,.45);border-radius:20px;padding:22px 19px 26px;}
+.mbox h2{font-family:'Cinzel',serif;font-size:.88rem;letter-spacing:.12em;color:var(--gold);margin-bottom:16px;text-align:center;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.1em;color:var(--lilac);margin-bottom:4px;}
+.field input,.field textarea{width:100%;background:rgba(13,10,26,.8);border:1px solid rgba(139,111,203,.35);border-radius:8px;padding:9px 11px;color:var(--pearl);font-family:'Crimson Pro',serif;font-size:.95rem;outline:none;-webkit-appearance:none;}
+.field textarea{resize:vertical;min-height:64px;}
+#photo-prev{width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:1px solid rgba(139,111,203,.3);display:none;margin-top:7px;}
+#ferr{display:none;background:rgba(180,40,60,.25);border:1px solid rgba(220,80,100,.4);border-radius:8px;padding:9px 12px;font-size:.84rem;color:#ffb0c0;margin-top:11px;line-height:1.5;}
+#ferr.show{display:block;}
+.form-acts{display:flex;gap:9px;margin-top:16px;}
+.form-acts button{flex:1;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;padding:15px;border-radius:10px;border:none;cursor:pointer;user-select:none;min-height:50px;}
+#btn-cancel{background:rgba(45,27,105,.5);border:1px solid rgba(139,111,203,.4);color:var(--pearl);}
+#btn-save{background:linear-gradient(135deg,var(--iris),#7040d0);color:var(--white);font-size:.75rem;}
+#del-modal{z-index:300;}
+#del-modal .mbox{max-width:310px;text-align:center;border-color:rgba(220,80,100,.4);}
+#del-modal h2{color:#e08898;}
+#del-gem-name{font-family:'Cinzel',serif;font-size:.92rem;color:var(--white);margin-bottom:10px;}
+#del-note{font-size:.84rem;font-style:italic;color:var(--lilac);margin-bottom:18px;line-height:1.55;}
+#del-acts{display:flex;gap:9px;}
+#del-acts button{flex:1;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.09em;padding:13px;border-radius:10px;cursor:pointer;user-select:none;min-height:48px;}
+#btn-del-no{background:rgba(45,27,105,.5);border:1px solid rgba(139,111,203,.4);color:var(--pearl);}
+#btn-del-yes{background:linear-gradient(135deg,#7a1530,#c03050);border:none;color:#ffe0e8;}
+#empty{display:none;text-align:center;padding:60px 20px;}
+#empty p{font-size:1rem;font-style:italic;color:var(--lilac);}
+#saved-flash{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(30,60,40,.95);border:1px solid #60d890;color:#c0ffd8;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.1em;padding:9px 18px;border-radius:16px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+#saved-flash.show{opacity:1;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="saved-flash">✦ Saved</div>
+<div id="app">
+  <header>
+    <h1>✦ Gem Gallery ✦</h1>
+    <p>A family mineral &amp; crystal collection</p>
+    <div id="gem-count">0 specimens</div>
+  </header>
+  <div id="toolbar">
+    <button class="tb-btn primary" id="btn-add">＋ Add Gem</button>
+  </div>
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search gems…" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <div id="gallery"></div>
+  <div id="empty"><p>No gems yet — tap ＋ Add Gem to begin.</p></div>
+</div>
+
+<div id="lightbox">
+  <div id="lb-inner">
+    <div id="lb-img-wrap">
+      <img id="lb-img" src="" alt="">
+      <div id="lb-nophoto">💎</div>
+    </div>
+    <button id="lb-close">✕</button>
+    <div id="lb-body">
+      <div id="lb-name"></div>
+      <div id="lb-group"></div>
+      <div id="lb-detail"></div>
+    </div>
+  </div>
+</div>
+
+<div id="add-modal" class="modal">
+  <div class="mbox">
+    <h2 id="form-title">✦ ADD NEW GEM ✦</h2>
+    <div class="field"><label>GEM ID</label><input id="f-id" type="text" placeholder="gem-001"></div>
+    <div class="field"><label>NAME</label><input id="f-name" type="text" placeholder="Amethyst Point"></div>
+    <div class="field"><label>GROUP / MINERAL TYPE</label><input id="f-group" type="text" placeholder="Quartz" list="grp-list"><datalist id="grp-list"></datalist></div>
+    <div class="field"><label>ORIGIN</label><input id="f-origin" type="text" placeholder="Brazil"></div>
+    <div class="field"><label>NOTES</label><textarea id="f-notes" placeholder="Description, size, characteristics…"></textarea></div>
+    <div class="field"><label>PHOTO</label><input id="f-photo" type="file" accept="image/*"><img id="photo-prev" alt="preview"></div>
+    <div id="ferr"></div>
+    <div class="form-acts">
+      <button id="btn-cancel">Cancel</button>
+      <button id="btn-save">Add to Collection</button>
+    </div>
+  </div>
+</div>
+
+<div id="del-modal" class="modal">
+  <div class="mbox">
+    <h2>DELETE GEM?</h2>
+    <div id="del-gem-name"></div>
+    <div id="del-note">This cannot be undone.</div>
+    <div id="del-acts">
+      <button id="btn-del-no">Keep It</button>
+      <button id="btn-del-yes">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Storage key ────────────────────────────────────────────────────────────
+var SK = 'gg2026';
+
+// ── Load from localStorage ─────────────────────────────────────────────────
+var gems = [], imgs = {}, rotated = {};
+try {
+  var _d = localStorage.getItem(SK);
+  if (_d) { var _p = JSON.parse(_d); gems = _p.gems||[]; imgs = _p.imgs||{}; }
+} catch(e) {}
+
+var editId = null, delId = null, pendingPhoto = null;
+
+// ── Persist ────────────────────────────────────────────────────────────────
+function persist() {
+  try { localStorage.setItem(SK, JSON.stringify({gems:gems, imgs:imgs})); } catch(e) {}
+  var f = document.getElementById('saved-flash');
+  f.classList.add('show');
+  clearTimeout(persist._t);
+  persist._t = setTimeout(function(){ f.classList.remove('show'); }, 1600);
+}
+
+// ── Stars ──────────────────────────────────────────────────────────────────
+(function(){
+  var c=document.getElementById('bg'),x=c.getContext('2d'),W,H,stars=[];
+  function sz(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  sz(); window.addEventListener('resize',sz);
+  for(var i=0;i<140;i++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.1+.3,s:Math.random()*.006+.002,p:Math.random()*Math.PI*2,c:Math.random()<.3?'#e8c97a':Math.random()<.5?'#b89fff':'#60c8d8'});
+  var gc=document.createElement('canvas'),gx=gc.getContext('2d');
+  function dg(){gc.width=W;gc.height=H;var g=gx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,W*.8);g.addColorStop(0,'rgba(45,27,105,.6)');g.addColorStop(.5,'rgba(19,13,46,.8)');g.addColorStop(1,'rgba(13,10,26,1)');gx.fillStyle=g;gx.fillRect(0,0,W,H);}
+  dg(); window.addEventListener('resize',dg);
+  var t=0;
+  (function draw(){x.clearRect(0,0,W,H);x.drawImage(gc,0,0);t+=.012;
+    for(var i=0;i<stars.length;i++){var s=stars[i];x.globalAlpha=.4+.6*(.5+.5*Math.sin(t*s.s*80+s.p));x.fillStyle=s.c;x.beginPath();x.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);x.fill();}
+    x.globalAlpha=1;requestAnimationFrame(draw);})();
+})();
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render(q) {
+  q = (q||'').toLowerCase().trim();
+  document.getElementById('gem-count').textContent = gems.length+' specimen'+(gems.length!==1?'s':'');
+  var list = q ? gems.filter(function(g){ return (g.name+' '+g.group+' '+g.origin+' '+g.notes+' '+g.id).toLowerCase().indexOf(q)>-1; }) : gems.slice();
+  var gal = document.getElementById('gallery');
+  var emp = document.getElementById('empty');
+  if (!list.length) { gal.innerHTML=''; emp.style.display='block'; return; }
+  emp.style.display='none';
+  var grps={};
+  list.forEach(function(g){ var k=g.group||'Uncategorized'; if(!grps[k]) grps[k]=[]; grps[k].push(g); });
+  var keys=Object.keys(grps).sort(function(a,b){return a.localeCompare(b);});
+  var h='';
+  keys.forEach(function(k){
+    h+='<div class="group-hd">'+e(k)+'</div><div class="gem-grid">';
+    grps[k].forEach(function(g){
+      var hi=!!(g.photo&&imgs[g.photo]), ro=rotated[g.id]?' rot':'';
+      h+='<div class="gem-tile"><div class="tile-img" data-id="'+e(g.id)+'">';
+      h+=hi?'<img class="tile-photo'+ro+'" src="'+imgs[g.photo]+'" loading="lazy">':'<div class="no-photo">💎</div>';
+      h+='<button class="rot-btn'+(rotated[g.id]?' on':'')+'" data-rid="'+e(g.id)+'">↻</button>';
+      h+='</div><div class="tile-info"><div class="tile-name">'+e(g.name||'')+'</div><div class="tile-sub">'+e(g.origin||'')+'</div><div class="tile-id">'+e(g.id||'')+'</div>';
+      h+='<div class="tile-acts"><button class="tile-act ebt" data-eid="'+e(g.id)+'">✎ Edit</button><button class="tile-act del dbt" data-did="'+e(g.id)+'">✕ Del</button></div>';
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  gal.innerHTML=h;
+  // bind tile events via delegation
+  gal.onclick = function(ev) {
+    var t=ev.target;
+    if (t.classList.contains('rot-btn')) { ev.stopPropagation(); doRot(t.getAttribute('data-rid')); return; }
+    if (t.classList.contains('ebt')) { ev.stopPropagation(); openEdit(t.getAttribute('data-eid')); return; }
+    if (t.classList.contains('dbt')) { ev.stopPropagation(); openDel(t.getAttribute('data-did')); return; }
+    var wrap = t.closest ? t.closest('.tile-img') : null;
+    if (wrap) openLB(wrap.getAttribute('data-id'));
+  };
+  gal.ontouchend = function(ev) {
+    var t=ev.target;
+    if (t.classList.contains('rot-btn')||t.classList.contains('ebt')||t.classList.contains('dbt')||t.closest&&t.closest('.tile-img')) {
+      ev.preventDefault(); gal.onclick(ev);
+    }
+  };
+}
+
+function doRot(id) {
+  rotated[id]=!rotated[id];
+  var img=document.querySelector('.tile-img[data-id="'+id+'"] .tile-photo');
+  var btn=document.querySelector('.rot-btn[data-rid="'+id+'"]');
+  if(img){rotated[id]?img.classList.add('rot'):img.classList.remove('rot');}
+  if(btn){rotated[id]?btn.classList.add('on'):btn.classList.remove('on');}
+}
+
+// ── Lightbox ───────────────────────────────────────────────────────────────
+function openLB(id) {
+  var g=find(id); if(!g) return;
+  var hi=!!(g.photo&&imgs[g.photo]);
+  var li=document.getElementById('lb-img'), ln=document.getElementById('lb-nophoto');
+  if(hi){li.src=imgs[g.photo];li.style.display='block';ln.style.display='none';rotated[id]?li.classList.add('rot'):li.classList.remove('rot');}
+  else{li.style.display='none';ln.style.display='flex';}
+  document.getElementById('lb-name').textContent=g.name||'';
+  document.getElementById('lb-group').textContent=(g.group||'')+(g.origin?' · '+g.origin:'');
+  var d=''; if(g.notes)d+='<p>'+e(g.notes)+'</p>'; if(g.id)d+='<p style="margin-top:6px"><span>ID:</span> '+e(g.id)+'</p>';
+  document.getElementById('lb-detail').innerHTML=d;
+  document.getElementById('lightbox').classList.add('open');
+}
+document.getElementById('lb-close').onclick=function(){document.getElementById('lightbox').classList.remove('open');};
+document.getElementById('lightbox').onclick=function(ev){if(ev.target===this)this.classList.remove('open');};
+
+// ── Search ─────────────────────────────────────────────────────────────────
+document.getElementById('search').oninput=function(){render(this.value);};
+
+// ── Add modal ──────────────────────────────────────────────────────────────
+document.getElementById('btn-add').onclick=function(){openAdd();};
+document.getElementById('btn-cancel').onclick=function(){closeAdd();};
+document.getElementById('btn-save').onclick=function(){trySave();};
+document.getElementById('add-modal').onclick=function(ev){if(ev.target===this)closeAdd();};
+document.getElementById('f-photo').onchange=function(){
+  var f=this.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try {
+      var img=new Image();
+      img.onload=function(){
+        try {
+          var MAX=800, q=0.75;
+          var w=img.width, h=img.height;
+          if(w>h){ if(w>MAX){h=Math.round(h*MAX/w);w=MAX;} }
+          else { if(h>MAX){w=Math.round(w*MAX/h);h=MAX;} }
+          var canvas=document.createElement('canvas');
+          canvas.width=w; canvas.height=h;
+          var ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          var compressed=canvas.toDataURL('image/jpeg',q);
+          pendingPhoto=compressed;
+        } catch(err) {
+          // If compression fails just use original
+          pendingPhoto=ev.target.result;
+        }
+        var p=document.getElementById('photo-prev');
+        p.src=pendingPhoto; p.style.display='block';
+      };
+      img.onerror=function(){
+        pendingPhoto=ev.target.result;
+        var p=document.getElementById('photo-prev');
+        p.src=pendingPhoto; p.style.display='block';
+      };
+      img.src=ev.target.result;
+    } catch(err) {
+      pendingPhoto=ev.target.result;
+      var p=document.getElementById('photo-prev');
+      p.src=pendingPhoto; p.style.display='block';
+    }
+  };
+  r.readAsDataURL(f);
+};
+
+function openAdd(){
+  editId=null; pendingPhoto=null;
+  document.getElementById('form-title').textContent='✦ ADD NEW GEM ✦';
+  document.getElementById('btn-save').textContent='Add to Collection';
+  document.getElementById('f-id').readOnly=false;
+  document.getElementById('f-id').style.opacity='1';
+  var mx=0; gems.forEach(function(g){var m=(g.id||'').match(/(\d+)$/);if(m)mx=Math.max(mx,+m[1]);});
+  document.getElementById('f-id').value='gem-'+pad(mx+1);
+  document.getElementById('f-name').value='';
+  document.getElementById('f-group').value='';
+  document.getElementById('f-origin').value='';
+  document.getElementById('f-notes').value='';
+  document.getElementById('f-photo').value='';
+  document.getElementById('photo-prev').style.display='none';
+  fillGrps(); clrErr();
+  document.getElementById('add-modal').classList.add('open');
+}
+function openEdit(id){
+  var g=find(id); if(!g) return;
+  editId=id; pendingPhoto=null;
+  document.getElementById('form-title').textContent='✦ EDIT GEM ✦';
+  document.getElementById('btn-save').textContent='Save Changes';
+  document.getElementById('f-id').value=g.id; document.getElementById('f-id').readOnly=true; document.getElementById('f-id').style.opacity='.5';
+  document.getElementById('f-name').value=g.name||'';
+  document.getElementById('f-group').value=g.group||'';
+  document.getElementById('f-origin').value=g.origin||'';
+  document.getElementById('f-notes').value=g.notes||'';
+  document.getElementById('f-photo').value='';
+  var p=document.getElementById('photo-prev'); var xi=g.photo?imgs[g.photo]:null;
+  if(xi){p.src=xi;p.style.display='block';}else{p.style.display='none';}
+  fillGrps(); clrErr();
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAdd(){document.getElementById('add-modal').classList.remove('open');editId=null;}
+function fillGrps(){
+  var g={}; gems.forEach(function(x){if(x.group)g[x.group]=1;});
+  document.getElementById('grp-list').innerHTML=Object.keys(g).sort().map(function(k){return '<option value="'+e(k)+'">'; }).join('');
+}
+function trySave(){
+  clrErr();
+  var id=document.getElementById('f-id').value.trim();
+  var nm=document.getElementById('f-name').value.trim();
+  var gr=document.getElementById('f-group').value.trim();
+  var or=document.getElementById('f-origin').value.trim();
+  var nt=document.getElementById('f-notes').value.trim();
+  if(!nm){shErr('Please enter a name.');return;}
+  if(editId){
+    var i=gems.findIndex(function(x){return x.id===editId;});
+    if(i<0){shErr('Gem not found.');return;}
+    if(pendingPhoto){imgs[editId]=pendingPhoto;gems[i].photo=editId;}
+    gems[i].name=nm;gems[i].group=gr||'Uncategorized';gems[i].origin=or;gems[i].notes=nt;
+    persist();
+    document.getElementById('btn-save').textContent='✓ Saved!';
+    setTimeout(function(){closeAdd();render(document.getElementById('search').value);},500);
+    return;
+  }
+  if(!id){shErr('Please enter a Gem ID.');return;}
+  if(find(id)){shErr('ID "'+id+'" already exists.');return;}
+  var gem={id:id,name:nm,group:gr||'Uncategorized',origin:or,notes:nt,photo:pendingPhoto?id:null};
+  if(pendingPhoto)imgs[id]=pendingPhoto;
+  gems.push(gem);
+  persist();
+  document.getElementById('btn-save').textContent='✓ Added!';
+  setTimeout(function(){closeAdd();render(document.getElementById('search').value);},500);
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────────
+function openDel(id){
+  var g=find(id); if(!g) return;
+  delId=id;
+  document.getElementById('del-gem-name').textContent=g.name||id;
+  document.getElementById('del-modal').classList.add('open');
+}
+document.getElementById('btn-del-no').onclick=function(){document.getElementById('del-modal').classList.remove('open');delId=null;};
+document.getElementById('btn-del-yes').onclick=function(){
+  if(!delId)return;
+  gems=gems.filter(function(g){return g.id!==delId;});
+  delete imgs[delId]; delete rotated[delId];
+  persist();
+  document.getElementById('del-modal').classList.remove('open');delId=null;
+  render(document.getElementById('search').value);
+};
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+function find(id){return gems.find(function(g){return g.id===id;})||null;}
+function pad(n){var s=String(n);while(s.length<3)s='0'+s;return s;}
+function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function shErr(m){var el=document.getElementById('ferr');el.textContent=m;el.classList.add('show');}
+function clrErr(){document.getElementById('ferr').classList.remove('show');}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+render('');
+</script>
+</body>
+</html>
